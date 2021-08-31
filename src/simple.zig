@@ -1,23 +1,8 @@
-const gmp = @cImport(@cInclude("gmp.h"));
+//const gmp = @cImport(@cInclude("gmp.h"));
 const custom = @import("custom-gmp-allocator.zig");
-const Integer = @import("gmp.zig").Integer;
+const gmp = @import("gmp.zig");
+const Integer = gmp.Integer;
 const std = @import("std");
-
-pub export fn f2() c_long {
-    custom.initCustomGMPAllocator();
-
-    var a: gmp.mpz_t = undefined;
-    gmp.mpz_init(&a);
-    _ = gmp.mpz_init_set_str(&a, "25", 10);
-    var b: gmp.mpz_t = undefined;
-    gmp.mpz_init(&b);
-    _ = gmp.mpz_init_set_str(&b, "389", 10);
-    var c: gmp.mpz_t = undefined;
-    _ = gmp.mpz_init(&c);
-    _ = gmp.mpz_add(&c, &a, &b);
-    _ = gmp.gmp_printf("%s is an mpz %Zd\n", "here", &c);
-    return gmp.mpz_get_si(&c);
-}
 
 pub export fn f() c_long {
     return _f() catch |err| {
@@ -65,9 +50,20 @@ pub export fn isPseudoPrime(s: [*:0]const u8) i32 {
     std.debug.print("\nisPseudoPrime ='{s}'\n", .{s});
     var n = Integer();
     n.initSetStr(s, 10) catch |err| {
-        std.debug.print("Error setting number -- {}\n", .{err});
+        std.debug.print("isPseudoPrime -- {}\n", .{err});
         return 0;
     };
     defer n.clear();
     return n.primalityTest(15);
+}
+
+var i: u32 = 0;
+pub export fn createInteger(s: [*:0]const u8) u32 {
+    var n = Integer();
+    n.initSetStr(s, 10) catch |err| {
+        std.debug.print("createInteger -- {}\n", .{err});
+        unreachable;
+    };
+    i += 1;
+    return i;
 }

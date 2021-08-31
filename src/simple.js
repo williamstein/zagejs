@@ -36,9 +36,7 @@ WebAssembly.instantiate(typedArray, {
   wasi.start(result.instance);
   simple.instance = result.instance;
   console.log("f() = ", result.instance.exports.f());
-  for (const name in result.instance.exports) {
-    exports[name] = result.instance.exports[name];
-  }
+
   result.instance.exports.fromString(stringToU8("hello world"));
 
   exports.isPseudoPrime = (n) => {
@@ -46,4 +44,8 @@ WebAssembly.instantiate(typedArray, {
   };
 
   console.log("isPseudoPrime(2021) = ", exports.isPseudoPrime(2021));
+
+  exports.createInteger = (n) => {
+    return result.instance.exports.createInteger(stringToU8(`${n}`));
+  };
 });

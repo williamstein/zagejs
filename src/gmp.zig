@@ -2,7 +2,7 @@ const gmp = @cImport(@cInclude("gmp.h"));
 const std = @import("std");
 pub const Errors = error{ ValueError, ZeroDivisionError };
 
-fn IntegerType() type {
+pub fn IntegerType() type {
     return struct {
         x: gmp.mpz_t,
 
