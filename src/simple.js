@@ -5,7 +5,7 @@ const wasi = new WASI({
 });
 
 const fs = require("fs");
-const source = fs.readFileSync("./simple.wasm");
+const source = fs.readFileSync(`${__dirname}/../build/simple.wasm`);
 const typedArray = new Uint8Array(source);
 
 const stub = (s) => () => console.log("stub", s);
@@ -17,6 +17,18 @@ const env = {
   main: console.log,
 };
 
+const encoder = new TextEncoder();
+function stringToU8(s) {
+  const array = new Int8Array(
+    simple.instance.exports.memory.buffer,
+    0,
+    s.length + 1
+  );
+  array.set(encoder.encode(s));
+  array[s.length] = 0;
+  return array;
+}
+
 WebAssembly.instantiate(typedArray, {
   env,
   wasi_snapshot_preview1: wasi.wasiImport,
@@ -24,4 +36,14 @@ WebAssembly.instantiate(typedArray, {
   wasi.start(result.instance);
   simple.instance = result.instance;
   console.log("f() = ", result.instance.exports.f());
+  for (const name in result.instance.exports) {
+    exports[name] = result.instance.exports[name];
+  }
+  result.instance.exports.fromString(stringToU8("hello world"));
+
+  exports.isPseudoPrime = (n) => {
+    return result.instance.exports.isPseudoPrime(stringToU8(`${n}`));
+  };
+
+  console.log("isPseudoPrime(2021) = ", exports.isPseudoPrime(2021));
 });

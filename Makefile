@@ -1,4 +1,7 @@
-FLAGS = -I. -L.
+FLAGS = -I. -L. #-O ReleaseFast
+
+install:
+	npm ci
 
 build-dir:
 	mkdir -p build
@@ -28,4 +31,4 @@ test-native: src/gmp.zig
 	cd src && zig test gmp.zig ${FLAGS} -lgmpnative -lc
 
 clean:
-	rm -rf build
+	rm -rf build zig-cache

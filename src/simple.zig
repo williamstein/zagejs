@@ -42,3 +42,32 @@ fn _f() !c_long {
 
     return c.get_c_long();
 }
+
+pub export fn add(a: i32, b: i32) c_long {
+    var a2 = Integer();
+    try a2.initSet(a);
+    defer a2.clear();
+
+    var b2 = Integer();
+    try b2.initSet(b);
+    defer b2.clear();
+
+    var c = a2.add(b2);
+    defer c.clear();
+    return c.get_c_long();
+}
+
+pub export fn fromString(s: [*:0]const u8) void {
+    std.debug.print("\nzig sees ='{s}'\n", .{s});
+}
+
+pub export fn isPseudoPrime(s: [*:0]const u8) i32 {
+    std.debug.print("\nisPseudoPrime ='{s}'\n", .{s});
+    var n = Integer();
+    n.initSetStr(s, 10) catch |err| {
+        std.debug.print("Error setting number -- {}\n", .{err});
+        return 0;
+    };
+    defer n.clear();
+    return n.primalityTest(15);
+}
