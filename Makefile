@@ -1,19 +1,31 @@
-simple.wasm: simple.zig
-	zig build-lib -target wasm32-wasi -I. -L. simple.zig libgmp.a -lc -dynamic
+FLAGS = -I. -L.
 
-run: simple.js simple.wasm
-	node simple.js
+build-dir:
+	mkdir -p build
 
-run-native: simple.zig native.zig
-	zig build-exe native.zig -I. -L. -lgmpnative -lc
-	./native
+build/simple.wasm: src/simple.zig build-dir
+	cd src && zig build-lib -target wasm32-wasi ${FLAGS} simple.zig libgmp.a -lc -dynamic
+	mv src/simple.wasm build
 
-run-native-custom: simple.zig native.zig
-	zig build-exe native-custom-allocator.zig -I. -L. -lgmpnative -lc
-	./native-custom-allocator
+run-wasm: src/simple.js build/simple.wasm
+	cd build && node ../src/simple.js
 
-gmp-native-test: gmp.zig
-	zig test gmp.zig -I. -L. -lgmpnative -lc
+build/native: src/simple.zig src/native.zig build-dir
+	cd src && zig build-exe native.zig ${FLAGS} -lgmpnative -lc
+	mv src/native build/native
+
+run-native: build/native
+	./build/native
+
+build/native-custom: src/simple.zig src/native.zig build-dir
+	cd src && zig build-exe native-custom-allocator.zig ${FLAGS} -lgmpnative -lc
+	mv src/native-custom-allocator build/native-custom-allocator
+
+run-native-custom: build/native-custom
+	./build/native-custom-allocator
+
+test-native: src/gmp.zig
+	cd src && zig test gmp.zig ${FLAGS} -lgmpnative -lc
 
 clean:
-	rm -rf *.wasm *.o
+	rm -rf build
